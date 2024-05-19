@@ -1,0 +1,73 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    | &#x9;
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    | &#x9;    
+    link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
+    | &#x9;    
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js')
+    | &#x9;    
+    script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')
+    | &#x9;    
+    link(rel='stylesheet', type='text/css', href='client/css/style.css')
+    | &#x9;    
+    title Login Page
+    | &#x9;    
+    style(type='text/css').
+      .jumbotron { text-align: center; }
+  body
+    .jumbotron(style='background: DarkSeaGreen !important')
+      h1 Login Page
+      br
+      br
+      p Please enter your username and password
+      p BOTH are case sensitive 
+      br
+      br
+    .row
+      .col-md-1
+      .col-md-10
+        p#error(hidden='', style='background: red; width: 20%;')  Login Error: Try Again
+        form#loginForm
+          label(for='user') Username:
+          input#username.form-control(type='text', placeholder='Username', required='')
+          br
+          label(for='password') Password:
+          input#password.form-control(type='text', placeholder='Password', required='')
+          br
+          br
+          button#loginButton.btn.btn-primary.btn-block(type='submit') Log In 
+      .col-md-1
+    script.
+      document.getElementById('loginForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      var name = document.getElementById("username").value;
+      var password = document.getElementById("password").value
+      const body = JSON.stringify({name: name, password: password})
+      console.log(body);
+      const requestOptions = {
+      method: 'post',
+      headers: {'Content-Type': 'application/json'},
+      body: body
+      };
+      fetch("/sendLoginDetails", requestOptions)
+      .then(response => {
+      console.log("Status is: ", response.status);
+      return response.text();
+      })
+      .then(data=> {
+      data = JSON.parse(data);
+      console.log("data status is: ", data.status);
+      if(data.status == "success"){
+      window.location.href = '/schedule';
+      }
+      else{
+      document.getElementById('error').removeAttribute('hidden');
+      document.getElementById('password').value = "";
+      document.getElementById('username').value = "";
+      }
+      })
+      .catch(error=> console.log("Request failed", error));
+      });

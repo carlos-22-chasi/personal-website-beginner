@@ -1,0 +1,20 @@
+tr:hover > td:nth-child(5) > .delete-btn, 
+tr:hover > td:nth-child(5) > .edit-btn{
+    display: inline-block;
+}
+
+.delete-btn, .edit-btn {
+    display: none;
+    font-size: 14px; 
+    color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+.delete-btn{
+    background-color: #EA4A35;
+}
+
+.edit-btn{
+    background-color: #3593EA;
+}

@@ -1,0 +1,167 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1, shrink-to-fit=no')
+    link(rel='stylesheet', href='../css/schedule.css')
+    link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css', integrity='sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO', crossorigin='anonymous')
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js', integrity='sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49', crossorigin='anonymous')
+    script(src='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js', integrity='sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy', crossorigin='anonymous')
+    title My Schedule
+  body
+    nav.navbar.navbar-expanded.navbar-light.bg-light.mb-5
+      ul.nav.nav-pills
+        li.nav-item
+          a.nav-link(href='/') Welcome
+        li.nav-item.active
+          a.nav-link.active(href='/schedule') Schedule
+        li.nav-item
+          a.nav-link(href='/addEvent') Add Event
+        li.nav-item
+          button.btn.btn-block.btn-secondary(type='button', onclick='LogOut()', data-toggle='tooltip', data-placement='top') Log Out
+    .container.mb-5
+      .alert.alert-secondary(role='alert')
+        | Click on a day to see its events
+    .container.mb-3
+      ul#days.nav.nav-tabs.nav-fill
+        li.nav-item
+          a.nav-link(onclick='formTable(this)') Sunday
+        li.nav-item
+          a.nav-link(onclick='formTable(this)') Monday
+        li.nav-item
+          a.nav-link(onclick='formTable(this)') Tuesday
+        li.nav-item
+          a.nav-link(onclick='formTable(this)') Wednesday
+        li.nav-item
+          a.nav-link(onclick='formTable(this)') Thursday
+        li.nav-item
+          a.nav-link(onclick='formTable(this)') Friday
+        li.nav-item
+          a.nav-link(onclick='formTable(this)') Saturday
+      br
+      br
+      .container
+        table#scheduleTable.table.table-striped
+          thead
+            tr
+              th(scope='col') Name
+              th(scope='col') Time
+              th(scope='col') Location
+              th(scope='col') Phone
+              th(scope='col') Extra Information
+          tbody
+    script.
+      function formTable(element) {
+      console.log("startingFormTbale");
+      $('#days li a').removeClass("active");
+      $(element).addClass("active");
+      clearTable();
+      let day = $(element).text().toLowerCase();
+      const body = JSON.stringify({day: day});
+      // console.log(body);
+      const requestOptions = {
+      method: 'post',
+      headers: {'Content-Type': 'application/json'},
+      body: body
+      };
+      fetch("/getScheduleInfo", requestOptions)
+      .then(response => {
+      // console.log("Status is: ",  response.status);
+      return response.text();
+      })
+      .then(data=>{
+      data = JSON.parse(data);
+      data = JSON.stringify(data);
+      console.log("data: ", data);
+      myArr = JSON.parse(data);
+      // console.log(myArr);
+      myFunction(myArr);
+      })
+      .catch(error=> console.log("Request failed",error));
+      }
+      function myFunction(arr) {
+      var html = "";
+      for(i = 0; i < arr.length; i++) {
+      var startTime = arr[i].event_start;
+      var endTime = arr[i].event_end;
+      var startValue;
+      var endValue;
+      //add am or pm to start time
+      // console.log(startTime);
+      startTime = startTime.split(':');
+      var hours = Number(startTime[0]);
+      var minutes = Number(startTime[1]);
+      if (hours > 0 && hours <= 12) {
+      startValue= "" + hours;
+      } else if (hours > 12) {
+      startValue= "" + (hours - 12);
+      } else if (hours == 0) {
+      startValue= "12";
+      }
+      startValue += (minutes < 10) ? ":0" + minutes : ":" + minutes;  // get the minutes to the time string
+      startValue += (hours >= 12) ? " P.M." : " A.M.";  // add AM/PM to time string
+      // add am or pm to end time
+      endTime = endTime.split(':');
+      var hours = Number(endTime[0]);
+      var minutes = Number(endTime[1]);
+      if (hours > 0 && hours <= 12) {
+      endValue= "" + hours;
+      } else if (hours > 12) {
+      endValue= "" + (hours - 12);
+      } else if (hours == 0) {
+      endValue= "12";
+      }
+      endValue += (minutes < 10) ? ":0" + minutes : ":" + minutes;  //add the minutes to the time string
+      endValue += (hours >= 12) ? " P.M." : " A.M.";  // add AM/PM to time string
+      //apend the information string
+      html += `<tr id = ${arr[i].event_id}>
+      <td>${arr[i].event_event}</td>
+      <td>${startValue} - ${endValue}</td>
+      <td>${arr[i].event_location}</td>
+      <td>${arr[i].event_phone}</td>
+      <td><a href=${arr[i].event_url}>${arr[i].event_info}</a>
+      <br>
+      <button class="delete-btn" onclick = "deleteEvent(${arr[i].event_id})" >Delete</button>
+      <button class="edit-btn" onclick = "editEvent(${arr[i].event_id})">Edit</button>
+      </td>
+      </tr>`;
+      }
+      //add the string to the table
+      $('#scheduleTable tbody').append(html);
+      }
+      function LogOut(){
+      console.log("in log out function");
+      fetch("/logout", {method: 'post'})
+      .then(response => {
+      console.log(response.status);
+      if(response.status == 200){
+      window.location.href = '/login';
+      }
+      })
+      .catch(error=> console.log("Request failed", error));
+      }
+      function clearTable() {
+      $('#scheduleTable tbody').empty();
+      }
+      function deleteEvent(eventID){
+      const confirmDelete = window.confirm("Are you sure you want to delete this event?");
+      if (confirmDelete) {
+      fetch(`/deleteEvent/${eventID}`, {method: "get"})
+      .then(response => {
+      console.log("Status: ", response.status);
+      if(response.status == 200){
+      console.log("Successfully deleted row: " + eventID);
+      document.getElementById(`${eventID}`).remove();
+      }
+      else{
+      console.log("row" + `${eventID}` + "not deleted");
+      }
+      })
+      .catch(error=> console.log("Request failed", error));
+      }
+      }
+      function editEvent(eventID){
+      console.log(eventID);
+      window.location.href = `/editEvent/${eventID}`;
+      }

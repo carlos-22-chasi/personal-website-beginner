@@ -1,0 +1,19 @@
+{
+  "name": "5599994_hw6",
+  "version": "1.0.0",
+  "description": "Assignment 6",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "5599994",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "mysql": "^2.18.1",
+    "pug": "^3.0.2"
+  }
+}
